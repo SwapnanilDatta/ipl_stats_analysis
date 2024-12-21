@@ -4,10 +4,15 @@ import os
 import pandas as pd
 import plotly.express as px
 
-# Initialize data loader with explicit path
+
+# Initialize data loader with explicit path to app/database/ipl.db
 current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
-db_path = os.path.join(project_root, 'ipl.db')
+db_path = os.path.join(current_dir, 'database', 'ipl.db')
+
+loader = IPLDataLoader(db_path)
+
+# Rest of your code remains the same
+
 
 loader = IPLDataLoader(db_path)
 

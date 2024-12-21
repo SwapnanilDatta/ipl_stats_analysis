@@ -6,10 +6,11 @@ class IPLDataLoader:
     def __init__(self, db_path=None):
         if db_path is None:
             current_dir = os.path.dirname(os.path.abspath(__file__))
-            project_root = os.path.dirname(current_dir)
-            self.db_path = os.path.join(project_root, 'ipl.db')
+            database_dir = os.path.join(current_dir, 'database')
+            self.db_path = os.path.join(database_dir, 'ipl.db')
         else:
             self.db_path = db_path
+
             
     def get_connection(self):
         return sqlite3.connect(self.db_path)
