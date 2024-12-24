@@ -3,6 +3,8 @@ from data_loader import IPLDataLoader
 import os
 import pandas as pd
 import plotly.express as px
+import matplotlib.pyplot as plt  # Add this import
+
 
 
 # Initialize data loader with explicit path to app/database/ipl.db
@@ -14,7 +16,6 @@ loader = IPLDataLoader(db_path)
 # Rest of your code remains the same
 
 
-loader = IPLDataLoader(db_path)
 
 
 def main():
@@ -25,11 +26,15 @@ def main():
     page = st.sidebar.radio("Go to", ["Season Stats", "Player Stats", "Team Analysis"])
 
     if page == "Season Stats":
-            show_season_stats()
+        show_season_stats()
     elif page == "Player Stats":
         show_player_stats()
-    # else:
-    #     show_team_analysis()
+    elif page == "Team Analysis":    
+        show_team_analysis()     
+
+
+
+
 
 
 def show_season_stats():
@@ -100,8 +105,7 @@ def show_player_stats():
         player2 = st.selectbox("Select Second Player", player_list, key='p2')
         player2_info = loader.get_player_details(player2)
     
-    # Statistical Comparison using plots
-    import plotly.express as px
+    
     
     # Create comparison dataframe
     comparison_stats = {
@@ -126,40 +130,54 @@ def show_player_stats():
 
 
 
-    # Add this function to your app.py
 
-# def show_team_analysis():
-#     st.header("Team Analysis Dashboard")
-    
-#     # Team Selection
-#     teams = loader.get_team_list()
-    
-#     # Head to Head Analysis
-#     st.subheader("Head to Head Records")
-#     team1 = st.selectbox("Select First Team", teams, key='t1')
-#     team2 = st.selectbox("Select Second Team", teams, key='t2')
-    
-#     h2h_data = loader.get_team_head_to_head()
-#     matches = h2h_data[(h2h_data['winner'] == team1)]
-    
-#     col1, col2 = st.columns(2)
-#     with col1:
-#         total_matches = matches['matches_played'].sum() if not matches.empty else 0
-#         st.metric("Total Matches", total_matches)
-#     with col2:
-#         wins = matches['matches_played'].sum() if not matches.empty else 0
-#         st.metric(f"{team1} Wins", wins)
 
+
+
+def show_team_analysis():
+    st.header("Team Analysis Dashboard")
     
-#     # Performance Trends
-#     st.subheader("Team Performance Trends")
-#     selected_team = st.selectbox("Select Team", teams, key='trend')
-#     trend_data = loader.get_team_performance_trend(selected_team)
     
-#     # Create trend visualization
-#     fig = px.line(trend_data, x='season', y='matches_played', 
-#                   title=f"{selected_team} - Performance Trend")
-#     st.plotly_chart(fig)
+    matches_df = loader.load_matches_data()
+    
+    # Team Selection
+    teams = loader.get_team_list()
+    
+    # Head to Head Analysis
+    st.subheader("Head to Head Records")
+    team1 = st.selectbox("Select First Team", teams, key='t1')
+    team2 = st.selectbox("Select Second Team", teams, key='t2')
+    
+    if st.button("Show Head to Head Analysis"):
+        seasonal_stats = seasonal_h2h_analysis(team1, team2, matches_df)
+        st.pyplot(plt)
+        st.dataframe(seasonal_stats)
+
+def seasonal_h2h_analysis(team1, team2, matches_df):
+    team_matches = matches_df[
+        ((matches_df['Team1'] == team1) & (matches_df['Team2'] == team2)) |
+        ((matches_df['Team1'] == team2) & (matches_df['Team2'] == team1))
+    ]
+    
+    seasonal_stats = team_matches.groupby('Season').apply(
+        lambda x: pd.Series({
+            team1: len(x[x['WinningTeam'] == team1]),
+            team2: len(x[x['WinningTeam'] == team2])
+        })
+    ).fillna(0)
+    
+    plt.figure(figsize=(12, 6))
+    seasonal_stats.plot(kind='bar', width=0.8)
+    plt.title(f'Season-wise Head to Head: {team1} vs {team2}')
+    plt.xlabel('Season')
+    plt.ylabel('Number of Wins')
+    plt.legend(title='Teams')
+    plt.xticks(rotation=45)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    
+    return seasonal_stats
+
+
 
 
 

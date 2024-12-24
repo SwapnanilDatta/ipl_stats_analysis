@@ -2,11 +2,9 @@ import pandas as pd
 import sqlite3
 import os
 
-# Get the project root directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 
-# Set paths
 db_path = os.path.join(project_root, 'ipl.db')
 seasons_csv = os.path.join(project_root, 'data', 'all_season_summary.csv')
 players_csv = os.path.join(project_root, 'data', 'ipl_players_api.csv')

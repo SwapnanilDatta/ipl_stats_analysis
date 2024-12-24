@@ -128,6 +128,20 @@ class IPLDataLoader:
         trend = pd.read_sql_query(query, conn)
         conn.close()
         return trend
+    
+    def load_matches_data(self):
+        matches_path = os.path.join(os.path.dirname(self.db_path), '..','..', 'data', 'filtered_ipl_matches.csv')
+        
+       
+        matches_df = pd.read_csv(matches_path)
+        
+        
+        
+        return matches_df
+    
+    def get_team_list(self):
+        matches_df = self.load_matches_data()
+        return sorted(matches_df['Team1'].unique())
 
 
 
